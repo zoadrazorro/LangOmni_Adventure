@@ -6,7 +6,7 @@ Get up and running in 5 minutes!
 
 - Docker and Docker Compose installed
 - 32GB+ RAM
-- (Optional) AMD Radeon 7900 XT GPUs with ROCm for full functionality
+- (Optional) GPUs with Ollama installed for full functionality
 
 ## Option 1: Infrastructure Only (No GPU)
 
@@ -27,9 +27,9 @@ docker-compose up -d
 # Grafana: http://localhost:3001 (admin/admin)
 ```
 
-The backend will use fallback responses instead of GPU inference.
+The backend will use fallback responses instead of Ollama inference.
 
-## Option 2: Full Setup with GPUs
+## Option 2: Full Setup with Ollama
 
 Complete setup with LLM inference.
 
@@ -37,14 +37,21 @@ Complete setup with LLM inference.
 # 1. Install dependencies
 make install
 
-# 2. Download models (one-time, ~45GB download)
-make models
+# 2. Install and configure Ollama
+# Follow instructions at https://ollama.ai/download
+# Pull required models:
+ollama pull llama3.1:70b
+ollama pull llama3.1:8b
 
 # 3. Start infrastructure
 docker-compose up -d redis postgres qdrant
 
-# 4. Start GPU servers (requires ROCm)
-make gpu-start
+# 4. Start Ollama servers
+# GPU 0 (default port 11434)
+ollama serve &
+
+# GPU 1 (port 11435)
+OLLAMA_HOST=0.0.0.0:11435 ollama serve &
 
 # 5. Start backend and frontend
 make dev
@@ -112,13 +119,13 @@ docker-compose down -v
 docker-compose up -d
 ```
 
-### GPU Server Issues
+### Ollama Server Issues
 ```bash
-# Check GPU status
-rocm-smi
+# Check Ollama status
+ollama list
 
-# View GPU server logs
-tail -f logs/gpu_0.log
+# View Ollama server logs
+journalctl -u ollama -f
 ```
 
 ## Next Steps

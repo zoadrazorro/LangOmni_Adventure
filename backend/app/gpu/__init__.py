@@ -1,1 +1,1 @@
-"""GPU management and vLLM integration."""
+"""GPU management and Ollama integration."""

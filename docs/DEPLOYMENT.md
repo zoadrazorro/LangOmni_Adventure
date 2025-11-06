@@ -16,7 +16,7 @@
 - **OS**: Ubuntu 22.04 LTS (or compatible Linux distribution)
 - **Docker**: 24.0.0+
 - **Docker Compose**: 2.20.0+
-- **AMD ROCm**: 6.0+ (for GPU inference)
+- **Ollama**: Latest version (for GPU inference)
 - **Python**: 3.11+ (for local development)
 - **Node.js**: 20+ (for frontend development)
 
@@ -53,92 +53,40 @@ docker-compose up -d postgres redis qdrant
 docker-compose ps
 ```
 
-### 4. Set Up GPU Inference Servers
+### 4. Set Up Ollama Inference Servers
 
-#### Install ROCm (if not already installed)
-
-```bash
-wget https://repo.radeon.com/amdgpu-install/6.0/ubuntu/jammy/amdgpu-install_6.0.60000-1_all.deb
-sudo apt install ./amdgpu-install_6.0.60000-1_all.deb
-sudo amdgpu-install --usecase=rocm
-```
-
-#### Install vLLM
+#### Install Ollama
 
 ```bash
-pip install vllm
-# Or with ROCm support
-pip install vllm-rocm
+# Install Ollama
+curl -fsSL https://ollama.ai/install.sh | sh
 ```
 
 #### Download Models
 
 ```bash
-# Create models directory
-mkdir -p models
+# Pull Llama 3.1 70B model
+ollama pull llama3.1:70b
 
-# Download Llama 3.1 70B (quantized)
-huggingface-cli download TheBloke/Llama-3.1-70B-Instruct-AWQ --local-dir models/llama-70b-awq
-
-# Download Llama 3.1 8B (quantized)
-huggingface-cli download TheBloke/Llama-3.1-8B-Instruct-AWQ --local-dir models/llama-8b-awq
+# Pull Llama 3.1 8B model
+ollama pull llama3.1:8b
 ```
 
 #### Start GPU 0 (World Simulator)
 
 ```bash
-# Terminal 1
-CUDA_VISIBLE_DEVICES=0 python -m vllm.entrypoints.openai.api_server \
-  --model models/llama-70b-awq \
-  --quantization awq \
-  --dtype auto \
-  --gpu-memory-utilization 0.90 \
-  --max-model-len 4096 \
-  --port 8001 \
-  --host 0.0.0.0
+# Terminal 1 - Default Ollama server on port 11434
+ollama serve
 ```
 
-#### Start GPU 1 Instances (NPC Engine)
+#### Start GPU 1 (NPC Engine)
 
 ```bash
-# Terminal 2 - Instance 1
-CUDA_VISIBLE_DEVICES=1 python -m vllm.entrypoints.openai.api_server \
-  --model models/llama-8b-awq \
-  --quantization awq \
-  --gpu-memory-utilization 0.22 \
-  --max-model-len 2048 \
-  --port 8002 \
-  --host 0.0.0.0 &
-
-# Terminal 3 - Instance 2
-CUDA_VISIBLE_DEVICES=1 python -m vllm.entrypoints.openai.api_server \
-  --model models/llama-8b-awq \
-  --quantization awq \
-  --gpu-memory-utilization 0.22 \
-  --max-model-len 2048 \
-  --port 8003 \
-  --host 0.0.0.0 &
-
-# Terminal 4 - Instance 3
-CUDA_VISIBLE_DEVICES=1 python -m vllm.entrypoints.openai.api_server \
-  --model models/llama-8b-awq \
-  --quantization awq \
-  --gpu-memory-utilization 0.22 \
-  --max-model-len 2048 \
-  --port 8004 \
-  --host 0.0.0.0 &
-
-# Terminal 5 - Instance 4
-CUDA_VISIBLE_DEVICES=1 python -m vllm.entrypoints.openai.api_server \
-  --model models/llama-8b-awq \
-  --quantization awq \
-  --gpu-memory-utilization 0.22 \
-  --max-model-len 2048 \
-  --port 8005 \
-  --host 0.0.0.0 &
+# Terminal 2 - Ollama server on port 11435
+OLLAMA_HOST=0.0.0.0:11435 ollama serve
 ```
 
-**Note**: Adjust `--gpu-memory-utilization` based on your actual VRAM availability.
+**Note**: Ollama automatically manages GPU memory and batching.
 
 ### 5. Start Backend Server
 
@@ -245,21 +193,17 @@ echo "0 2 * * * /usr/local/bin/backup-langomni.sh" | sudo crontab -
 
 ### Scaling for Production
 
-#### Increase GPU Instances
+#### Increase Ollama Capacity
 
-For GPU 1, you can run more instances:
+For better performance, you can configure Ollama to handle more concurrent requests:
 
 ```bash
-# Run 8 instances instead of 4
-for port in {8002..8009}; do
-  CUDA_VISIBLE_DEVICES=1 python -m vllm.entrypoints.openai.api_server \
-    --model models/llama-8b-awq \
-    --quantization awq \
-    --gpu-memory-utilization 0.11 \
-    --max-model-len 2048 \
-    --port $port \
-    --host 0.0.0.0 &
-done
+# Configure Ollama environment variables
+export OLLAMA_NUM_PARALLEL=8
+export OLLAMA_MAX_LOADED_MODELS=2
+
+# Restart Ollama server
+systemctl restart ollama
 ```
 
 #### Load Balancing
@@ -302,11 +246,11 @@ services:
 ### GPU Not Detected
 
 ```bash
-# Check ROCm installation
-rocm-smi
+# Check Ollama installation
+ollama list
 
-# Verify vLLM can see GPUs
-python -c "import torch; print(torch.cuda.is_available())"
+# Verify Ollama is running
+curl http://localhost:11434/api/tags
 ```
 
 ### High Memory Usage
@@ -315,8 +259,8 @@ python -c "import torch; print(torch.cuda.is_available())"
 # Check memory usage
 docker stats
 
-# Reduce vLLM memory utilization
-# Edit --gpu-memory-utilization to 0.80 or lower
+# Ollama automatically manages GPU memory
+# You can configure it via environment variables if needed
 ```
 
 ### Database Connection Issues
@@ -358,17 +302,17 @@ proxy_send_timeout 3600;
 
 ## Performance Tuning
 
-### Optimize vLLM
+### Optimize Ollama
 
 ```bash
-# Enable KV cache
---enable-prefix-caching
+# Ollama automatically optimizes inference
+# You can configure via environment variables:
 
-# Adjust batch size
---max-num-batched-tokens 8192
+# Set number of parallel requests
+export OLLAMA_NUM_PARALLEL=4
 
-# Enable speculative decoding (if supported)
---use-speculative-decoding
+# Set context window size
+export OLLAMA_MAX_LOADED_MODELS=2
 ```
 
 ### Optimize PostgreSQL
@@ -400,17 +344,15 @@ save 60 10000
 ### Update Models
 
 ```bash
-# Download new model version
-huggingface-cli download TheBloke/Llama-3.2-70B-Instruct-AWQ --local-dir models/llama-70b-new
+# Pull new model version
+ollama pull llama3.2:70b
 
-# Stop old server
-pkill -f "vllm.*port 8001"
+# Restart Ollama server
+systemctl restart ollama
 
-# Start new server
-CUDA_VISIBLE_DEVICES=0 python -m vllm.entrypoints.openai.api_server \
-  --model models/llama-70b-new \
-  --port 8001 \
-  # ... other flags
+# Or if running manually
+pkill ollama
+ollama serve
 ```
 
 ### Database Migrations

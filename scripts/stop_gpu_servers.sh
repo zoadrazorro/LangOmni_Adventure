@@ -1,8 +1,8 @@
 #!/bin/bash
-# Stop all GPU inference servers
+# Stop all Ollama inference servers
 
-echo "Stopping all GPU inference servers..."
+echo "Stopping all Ollama inference servers..."
 
-pkill -f "vllm.entrypoints.openai.api_server"
+pkill -f "ollama serve"
 
-echo "All GPU servers stopped."
+echo "All Ollama servers stopped."

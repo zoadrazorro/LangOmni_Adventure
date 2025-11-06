@@ -36,7 +36,7 @@ LangOmni_Adventure/
 │   │   ├── core/
 │   │   │   └── orchestrator.py  # Central orchestrator
 │   │   ├── gpu/
-│   │   │   └── manager.py       # GPU manager for vLLM
+│   │   │   └── manager.py       # GPU manager for Ollama
 │   │   ├── services/
 │   │   │   ├── cache.py         # Redis cache service
 │   │   │   └── rate_limiter.py  # Rate limiting
@@ -92,7 +92,7 @@ LangOmni_Adventure/
 - **Central Orchestrator**: Brain of the system, coordinates all components
 - **Dual GPU Support**:
   - GPU 0: Llama 3.1 70B for world simulation
-  - GPU 1: 4x Llama 3.1 8B instances for NPC interactions
+  - GPU 1: Llama 3.1 8B for NPC interactions
 - **WebSocket Gateway**: Real-time bidirectional communication
 - **Smart Caching**: Redis-based caching with configurable TTL
 - **Rate Limiting**: Per-player action throttling (4 actions/sec)
@@ -140,7 +140,7 @@ LangOmni_Adventure/
 - **Uptime**: 99.9% target
 - **GPU Efficiency**:
   - GPU 0: 15-25 tokens/sec
-  - GPU 1: 120-160 tokens/sec aggregate
+  - GPU 1: 30-40 tokens/sec
 
 ## Technology Stack
 
@@ -173,10 +173,9 @@ LangOmni_Adventure/
 - Grafana (dashboards)
 
 ### AI/ML
-- vLLM (inference server)
-- Llama 3.1 70B (AWQ quantized)
-- Llama 3.1 8B (AWQ quantized)
-- AMD ROCm (GPU runtime)
+- Ollama (inference server)
+- Llama 3.1 70B
+- Llama 3.1 8B
 
 ## Quick Start
 
@@ -190,11 +189,13 @@ cp .env.example .env
 # 2. Start infrastructure
 docker-compose up -d redis postgres qdrant
 
-# 3. Download models (one-time)
-make models
+# 3. Pull models (one-time)
+ollama pull llama3.1:70b
+ollama pull llama3.1:8b
 
-# 4. Start GPU servers
-make gpu-start
+# 4. Start Ollama servers
+ollama serve &
+OLLAMA_HOST=0.0.0.0:11435 ollama serve &
 
 # 5. Start backend and frontend
 make dev

@@ -71,8 +71,8 @@ class Orchestrator:
         if self.settings.GPU_0_ENABLED:
             self.gpu_0_manager = GPUManager(
                 gpu_id="gpu_0",
-                model_url=self.settings.VLLM_GPU_0_URL,
-                model_name=self.settings.VLLM_GPU_0_MODEL,
+                model_url=self.settings.OLLAMA_GPU_0_URL,
+                model_name=self.settings.OLLAMA_GPU_0_MODEL,
             )
             await self.gpu_0_manager.initialize()
             logger.info("GPU 0 manager initialized")
@@ -80,8 +80,8 @@ class Orchestrator:
         if self.settings.GPU_1_ENABLED:
             self.gpu_1_manager = GPUManager(
                 gpu_id="gpu_1",
-                model_url=self.settings.VLLM_GPU_1_URL,
-                model_name=self.settings.VLLM_GPU_1_MODEL,
+                model_url=self.settings.OLLAMA_GPU_1_URL,
+                model_name=self.settings.OLLAMA_GPU_1_MODEL,
             )
             await self.gpu_1_manager.initialize()
             logger.info("GPU 1 manager initialized")
