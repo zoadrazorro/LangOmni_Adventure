@@ -1,37 +1,30 @@
 #!/bin/bash
-# Download required models for LangOmni Adventure
+# Download required models for LangOmni Adventure using Ollama
 
 set -e
 
 echo "LangOmni Adventure - Model Download Script"
 echo "=========================================="
 
-# Create models directory
-mkdir -p models
-
-# Check if huggingface-cli is installed
-if ! command -v huggingface-cli &> /dev/null; then
-    echo "Installing huggingface-cli..."
-    pip install huggingface-hub
+# Check if Ollama is installed
+if ! command -v ollama &> /dev/null; then
+    echo "Error: Ollama not found. Please install Ollama first."
+    echo "Visit: https://ollama.ai/download"
+    exit 1
 fi
 
 echo ""
-echo "Downloading Llama 3.1 70B Instruct (AWQ quantized)..."
-echo "This may take a while (~40GB)..."
-huggingface-cli download TheBloke/Llama-3.1-70B-Instruct-AWQ \
-    --local-dir models/llama-70b-awq \
-    --local-dir-use-symlinks False
+echo "Pulling Llama 3.1 70B model..."
+echo "This may take a while depending on your connection..."
+ollama pull llama3.1:70b
 
 echo ""
-echo "Downloading Llama 3.1 8B Instruct (AWQ quantized)..."
-echo "This will be ~5GB..."
-huggingface-cli download TheBloke/Llama-3.1-8B-Instruct-AWQ \
-    --local-dir models/llama-8b-awq \
-    --local-dir-use-symlinks False
+echo "Pulling Llama 3.1 8B model..."
+ollama pull llama3.1:8b
 
 echo ""
 echo "Model download complete!"
-echo "Models are located in: ./models/"
+echo "You can verify the models with: ollama list"
 echo ""
-echo "You can now start the GPU servers with:"
+echo "You can now start the Ollama servers with:"
 echo "  ./scripts/start_gpu_servers.sh"

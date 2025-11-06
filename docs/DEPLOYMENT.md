@@ -193,21 +193,17 @@ echo "0 2 * * * /usr/local/bin/backup-langomni.sh" | sudo crontab -
 
 ### Scaling for Production
 
-#### Increase GPU Instances
+#### Increase Ollama Capacity
 
-For GPU 1, you can run more instances:
+For better performance, you can configure Ollama to handle more concurrent requests:
 
 ```bash
-# Run 8 instances instead of 4
-for port in {8002..8009}; do
-  CUDA_VISIBLE_DEVICES=1 python -m vllm.entrypoints.openai.api_server \
-    --model models/llama-8b-awq \
-    --quantization awq \
-    --gpu-memory-utilization 0.11 \
-    --max-model-len 2048 \
-    --port $port \
-    --host 0.0.0.0 &
-done
+# Configure Ollama environment variables
+export OLLAMA_NUM_PARALLEL=8
+export OLLAMA_MAX_LOADED_MODELS=2
+
+# Restart Ollama server
+systemctl restart ollama
 ```
 
 #### Load Balancing
