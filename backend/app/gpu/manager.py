@@ -113,7 +113,6 @@ class GPUManager:
         try:
             response = await self.client.get("/api/tags", timeout=5.0)
             return response.status_code == 200
-            return response.status_code == 200
         except:
             return False
 
