@@ -109,9 +109,10 @@ class GPUManager:
             raise
 
     async def health_check(self) -> bool:
-        """Check if the GPU server is healthy."""
+        """Check if the Ollama server is healthy."""
         try:
-            response = await self.client.get("/health", timeout=5.0)
+            response = await self.client.get("/api/tags", timeout=5.0)
+            return response.status_code == 200
             return response.status_code == 200
         except:
             return False
