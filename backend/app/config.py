@@ -30,13 +30,13 @@ class Settings(BaseSettings):
 
     # Ollama Settings for GPU 0 (World Simulator)
     OLLAMA_GPU_0_MODEL: str = "llama3.1:70b"
-    OLLAMA_GPU_0_MAX_TOKENS: int = 4096
-    OLLAMA_GPU_0_NUM_CTX: int = 4096
+    OLLAMA_GPU_0_MAX_TOKENS: int = 4096  # Future use: pass to GPUManager
+    OLLAMA_GPU_0_NUM_CTX: int = 4096     # Future use: context window size
 
     # Ollama Settings for GPU 1 (NPC Engine)
     OLLAMA_GPU_1_MODEL: str = "llama3.1:8b"
-    OLLAMA_GPU_1_MAX_TOKENS: int = 2048
-    OLLAMA_GPU_1_NUM_CTX: int = 2048
+    OLLAMA_GPU_1_MAX_TOKENS: int = 2048  # Future use: pass to GPUManager
+    OLLAMA_GPU_1_NUM_CTX: int = 2048     # Future use: context window size
 
     # Game Configuration
     MAX_CONCURRENT_PLAYERS: int = 80
