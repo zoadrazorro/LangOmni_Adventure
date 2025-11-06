@@ -8,8 +8,8 @@ A high-performance multiplayer LLM adventure game powered by dual AMD Radeon 790
 
 ### System Components
 
-- **GPU 0**: World Simulator (Llama 3.1 70B 4-bit) - Physics, environment, consequences
-- **GPU 1**: NPC Engine (4x Llama 3.1 8B instances) - Character interactions and dialogue
+- **GPU 0**: World Simulator (Llama 3.1 70B) - Physics, environment, consequences
+- **GPU 1**: NPC Engine (Llama 3.1 8B) - Character interactions and dialogue
 - **Central Orchestrator**: FastAPI + asyncio for request routing and GPU load balancing
 - **Redis Cluster**: Hot state cache, pub/sub, rate limiting
 - **PostgreSQL + TimescaleDB**: Persistent world state, player data, event logging
@@ -32,7 +32,7 @@ A high-performance multiplayer LLM adventure game powered by dual AMD Radeon 790
 - Docker & Docker Compose
 - 32GB+ RAM (64GB recommended)
 - AMD Radeon 7900 XT (2x) or similar GPUs
-- AMD ROCm 6.0+ (for GPU inference)
+- Ollama installed for GPU inference
 - Node.js 20+ (for frontend development)
 - Python 3.11+ (for backend development)
 
@@ -55,28 +55,24 @@ A high-performance multiplayer LLM adventure game powered by dual AMD Radeon 790
    docker-compose up -d redis postgres qdrant
    ```
 
-4. **Set up GPU inference servers**
+4. **Set up Ollama inference servers**
 
    For GPU 0 (World Simulator):
    ```bash
-   python -m vllm.entrypoints.openai.api_server \
-     --model meta-llama/Llama-3.1-70B-Instruct \
-     --quantization awq \
-     --dtype auto \
-     --gpu-memory-utilization 0.90 \
-     --max-model-len 4096 \
-     --port 8001
+   # Start Ollama server on port 11434 (default)
+   ollama serve
+   
+   # Pull the model
+   ollama pull llama3.1:70b
    ```
 
-   For GPU 1 (NPC Engine - run 4 instances on different ports):
+   For GPU 1 (NPC Engine):
    ```bash
-   # Instance 1
-   CUDA_VISIBLE_DEVICES=1 python -m vllm.entrypoints.openai.api_server \
-     --model meta-llama/Llama-3.1-8B-Instruct \
-     --quantization awq \
-     --port 8002 &
-
-   # Instances 2-4 on ports 8003-8005...
+   # Start Ollama server on port 11435
+   OLLAMA_HOST=0.0.0.0:11435 ollama serve &
+   
+   # Pull the model
+   OLLAMA_HOST=localhost:11435 ollama pull llama3.1:8b
    ```
 
 5. **Start the backend**
@@ -119,7 +115,7 @@ LangOmni_Adventure/
 │   │   ├── core/           # Core orchestrator logic
 │   │   ├── models/         # Database models
 │   │   ├── services/       # Business logic
-│   │   ├── gpu/            # GPU manager & vLLM integration
+│   │   ├── gpu/            # GPU manager & Ollama integration
 │   │   └── db/             # Database utilities
 │   ├── requirements.txt
 │   └── Dockerfile
@@ -204,6 +200,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🙏 Acknowledgments
 
-- Built with FastAPI, React, and vLLM
+- Built with FastAPI, React, and Ollama
 - Powered by Llama 3.1 models from Meta
 - Inspired by classic text adventures and modern MMORPGs

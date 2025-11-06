@@ -25,20 +25,18 @@ class Settings(BaseSettings):
     # GPU Configuration
     GPU_0_ENABLED: bool = False
     GPU_1_ENABLED: bool = False
-    VLLM_GPU_0_URL: str = "http://localhost:8001"
-    VLLM_GPU_1_URL: str = "http://localhost:8002"
+    OLLAMA_GPU_0_URL: str = "http://localhost:11434"
+    OLLAMA_GPU_1_URL: str = "http://localhost:11435"
 
-    # vLLM Settings for GPU 0 (World Simulator)
-    VLLM_GPU_0_MODEL: str = "meta-llama/Llama-3.1-70B-Instruct"
-    VLLM_GPU_0_QUANTIZATION: str = "awq"
-    VLLM_GPU_0_MAX_MODEL_LEN: int = 4096
-    VLLM_GPU_0_GPU_MEMORY_UTILIZATION: float = 0.90
+    # Ollama Settings for GPU 0 (World Simulator)
+    OLLAMA_GPU_0_MODEL: str = "llama3.1:70b"
+    OLLAMA_GPU_0_MAX_TOKENS: int = 4096
+    OLLAMA_GPU_0_NUM_CTX: int = 4096
 
-    # vLLM Settings for GPU 1 (NPC Engine)
-    VLLM_GPU_1_MODEL: str = "meta-llama/Llama-3.1-8B-Instruct"
-    VLLM_GPU_1_QUANTIZATION: str = "awq"
-    VLLM_GPU_1_MAX_MODEL_LEN: int = 2048
-    VLLM_GPU_1_GPU_MEMORY_UTILIZATION: float = 0.90
+    # Ollama Settings for GPU 1 (NPC Engine)
+    OLLAMA_GPU_1_MODEL: str = "llama3.1:8b"
+    OLLAMA_GPU_1_MAX_TOKENS: int = 2048
+    OLLAMA_GPU_1_NUM_CTX: int = 2048
 
     # Game Configuration
     MAX_CONCURRENT_PLAYERS: int = 80

@@ -1,8 +1,8 @@
 """
-GPU Manager - Interface to vLLM inference servers.
+GPU Manager - Interface to Ollama inference servers.
 
 Handles:
-- Connection to vLLM OpenAI-compatible API
+- Connection to Ollama API
 - Load balancing for multi-instance setups
 - Request queuing and batching
 - Health monitoring
@@ -62,30 +62,33 @@ class GPUManager:
         """
         Generate text using the LLM.
 
-        Uses OpenAI-compatible API format for vLLM.
+        Uses Ollama API format.
         """
         start_time = datetime.utcnow()
 
         try:
             response = await self.client.post(
-                "/v1/completions",
+                "/api/generate",
                 json={
                     "model": self.model_name,
                     "prompt": prompt,
-                    "max_tokens": max_tokens,
-                    "temperature": temperature,
-                    "top_p": top_p,
                     "stream": False,
+                    "options": {
+                        "temperature": temperature,
+                        "top_p": top_p,
+                        "num_predict": max_tokens,
+                    },
                 },
             )
             response.raise_for_status()
 
             data = response.json()
-            generated_text = data["choices"][0]["text"]
+            generated_text = data["response"]
 
             # Update metrics
             self.total_requests += 1
-            self.total_tokens += data.get("usage", {}).get("total_tokens", 0)
+            # Ollama returns eval_count and prompt_eval_count for token usage
+            self.total_tokens += data.get("eval_count", 0) + data.get("prompt_eval_count", 0)
 
             elapsed = (datetime.utcnow() - start_time).total_seconds()
             self.total_latency += elapsed

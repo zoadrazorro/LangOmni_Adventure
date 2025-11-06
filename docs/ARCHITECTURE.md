@@ -42,12 +42,12 @@ LangOmni Adventure is a high-performance multiplayer LLM-powered adventure game 
 │ World   │      │   NPC        │   │  ┌───────────┐  │
 │ Sim     │      │   Engine     │   │  │ Cache     │  │
 │         │      │              │   │  │ Pub/Sub   │  │
-│ Llama   │      │ 4x Llama     │   │  │ Rate Lim  │  │
-│ 70B 4bit│      │ 8B instances │   │  │ Sessions  │  │
+│ Llama   │      │ Llama        │   │  │ Rate Lim  │  │
+│ 70B     │      │ 8B           │   │  │ Sessions  │  │
 │         │      │              │   │  └───────────┘  │
-│ ~18GB   │      │ ~16GB total  │   └─────────────────┘
+│ ~18GB   │      │ ~4GB         │   └─────────────────┘
 │         │      │              │
-│ vLLM    │      │ vLLM multi   │
+│ Ollama  │      │ Ollama       │
 └────┬────┘      └──────┬───────┘
      │                  │
      └─────────┬────────┘
@@ -102,13 +102,13 @@ LangOmni Adventure is a high-performance multiplayer LLM-powered adventure game 
 
 ### 3. GPU 0: World Simulator
 
-**Model**: Llama 3.1 70B Instruct (4-bit quantized via AWQ)
+**Model**: Llama 3.1 70B Instruct
 
 **VRAM**: ~18GB
 
 **Performance**: 15-25 tokens/sec
 
-**Batch Size**: 4-8 concurrent requests
+**Batch Size**: Handled by Ollama
 
 **Responsibilities**:
 - Physics simulation
@@ -118,19 +118,17 @@ LangOmni Adventure is a high-performance multiplayer LLM-powered adventure game 
 - Weather systems
 - World state updates
 
-**Framework**: vLLM with continuous batching
+**Framework**: Ollama
 
 ### 4. GPU 1: NPC Engine
 
-**Setup**: Multi-instance deployment
+**Setup**: Single instance deployment
 
-**Models**: 4x Llama 3.1 8B Instruct (4-bit quantized)
+**Models**: Llama 3.1 8B Instruct
 
-**VRAM**: ~4GB per instance, ~16GB total
+**VRAM**: ~4GB
 
-**Performance**: 120-160 tokens/sec aggregate
-
-**Load Balancing**: Round-robin across instances
+**Performance**: 30-40 tokens/sec
 
 **Responsibilities**:
 - NPC dialogue generation

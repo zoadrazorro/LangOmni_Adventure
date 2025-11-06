@@ -66,8 +66,8 @@ services:
       QDRANT_URL: http://qdrant:6333
       GPU_0_ENABLED: ${GPU_0_ENABLED:-false}
       GPU_1_ENABLED: ${GPU_1_ENABLED:-false}
-      VLLM_GPU_0_URL: ${VLLM_GPU_0_URL:-http://localhost:8001}
-      VLLM_GPU_1_URL: ${VLLM_GPU_1_URL:-http://localhost:8002}
+      OLLAMA_GPU_0_URL: ${OLLAMA_GPU_0_URL:-http://localhost:11434}
+      OLLAMA_GPU_1_URL: ${OLLAMA_GPU_1_URL:-http://localhost:11435}
       LOG_LEVEL: ${LOG_LEVEL:-info}
     volumes:
       - ./backend:/app
